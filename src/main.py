@@ -1,8 +1,31 @@
+
+import argparse
+from pathlib import Path
+
 from .shell import Shell
 
 
+def read_args():
+    parser = argparse.ArgumentParser(description="Оболочка, вариант 22")
+    parser.add_argument("--vfs", default="fixtures/multiple.json",
+                        help="путь к JSON-файлу VFS")
+    parser.add_argument("--script", default="",
+                        help="путь к стартовому скрипту")
+    return parser.parse_args()
+
+
 def main():
-    Shell().repl()
+    args = read_args()
+    config = {"vfs": args.vfs, "script": args.script}
+    shell = Shell(Path(args.vfs).stem, config)
+    shell.conf_dump([])
+    try:
+        if args.script and not shell.run_script(args.script):
+            return 1
+        shell.repl()
+    except OSError as error:
+        print(f"Ошибка запуска: {error}")
+        return 1
     return 0
 
 

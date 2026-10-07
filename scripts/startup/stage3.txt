@@ -1,0 +1,5 @@
+conf-dump
+ls
+cd /
+cd
+exit

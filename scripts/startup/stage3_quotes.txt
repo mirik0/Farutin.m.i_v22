@@ -1,0 +1,5 @@
+conf-dump
+ls "/my folder"
+cd '/my folder'
+cd ..
+exit

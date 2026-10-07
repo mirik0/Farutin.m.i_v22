@@ -3,6 +3,7 @@ import argparse
 from pathlib import Path
 
 from .shell import Shell
+from .vfs import VFS
 
 
 def read_args():
@@ -17,13 +18,15 @@ def read_args():
 def main():
     args = read_args()
     config = {"vfs": args.vfs, "script": args.script}
-    shell = Shell(Path(args.vfs).stem, config)
-    shell.conf_dump([])
     try:
+        vfs = VFS(args.vfs)
+        shell = Shell(vfs.name, config)
+        shell.conf_dump([])
+        vfs.show_motd()
         if args.script and not shell.run_script(args.script):
             return 1
         shell.repl()
-    except OSError as error:
+    except (OSError, ValueError, KeyError, TypeError) as error:
         print(f"Ошибка запуска: {error}")
         return 1
     return 0

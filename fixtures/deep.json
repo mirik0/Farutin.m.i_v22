@@ -1,0 +1,11 @@
+{
+  "name": "deep-vfs",
+  "directories": ["/", "/level1", "/level1/level2",
+                  "/level1/level2/level3"],
+  "files": {
+    "/motd": {"text": "VFS с тремя уровнями вложенных каталогов.\n"},
+    "/level1/first.txt": {"text": "Первый уровень.\n"},
+    "/level1/level2/second.txt": {"text": "Второй уровень.\n"},
+    "/level1/level2/level3/third.txt": {"text": "Третий уровень.\n"}
+  }
+}

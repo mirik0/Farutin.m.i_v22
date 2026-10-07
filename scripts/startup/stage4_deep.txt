@@ -1,0 +1,10 @@
+ls /level1
+cd /level1/level2/level3
+pwd
+ls
+cd ../..
+pwd
+ls
+cd ../../..
+pwd
+exit

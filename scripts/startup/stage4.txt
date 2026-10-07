@@ -1,0 +1,19 @@
+conf-dump
+ls
+ls -a
+ls /docs
+ls readme.txt
+ls empty
+ls "/my folder"
+cd "my folder"
+pwd
+ls 'file name.txt'
+cd .
+cd ..
+cd /docs
+pwd
+cd
+pwd
+date
+uptime
+exit

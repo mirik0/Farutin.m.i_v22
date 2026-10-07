@@ -6,12 +6,13 @@ from contextlib import redirect_stdout
 from pathlib import Path
 
 from src.shell import Shell
+from src.vfs import VFS
 
 
 class ScriptTests(unittest.TestCase):
 
     def run_script(self, text):
-        shell = Shell()
+        shell = Shell(VFS("fixtures/multiple.json"))
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "commands.txt"
             path.write_text(text, encoding="utf-8")
@@ -34,7 +35,8 @@ class ScriptTests(unittest.TestCase):
         self.assertNotIn("bad", output)
 
     def test_dump(self):
-        shell = Shell(config={"vfs": "a.json", "script": "b.txt"})
+        shell = Shell(VFS("fixtures/multiple.json"),
+                      config={"vfs": "a.json", "script": "b.txt"})
         output = io.StringIO()
         with redirect_stdout(output):
             shell.conf_dump([])

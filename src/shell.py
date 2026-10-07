@@ -1,18 +1,26 @@
 
-from .parser import parse_command
+import time
+from datetime import datetime, timedelta
 from pathlib import Path
+
+from .parser import no_args, parse_command, parse_options, single_path
 
 
 class Shell:
 
-    def __init__(self, name="vfs", config=None):
-        self.name = name
+    def __init__(self, vfs, config=None):
+        self.vfs = vfs
+        self.name = vfs.name
         self.cwd = "/"
         self.running = True
         self.config = config or {"vfs": "", "script": ""}
+        self.started = time.monotonic()
         self.commands = {
-            "ls": self.stub,
-            "cd": self.stub,
+            "ls": self.ls,
+            "cd": self.cd,
+            "date": self.date,
+            "uptime": self.uptime,
+            "pwd": self.pwd,
             "exit": self.exit,
             "conf-dump": self.conf_dump,
         }
@@ -28,29 +36,43 @@ class Shell:
             command, *args = words
             if command not in self.commands:
                 raise ValueError(f"неизвестная команда: {command}")
-            if command in ("ls", "cd"):
-                self.stub([command] + args)
-            else:
-                self.commands[command](args)
+            self.commands[command](args)
             return True
         except (ValueError, OSError) as error:
             print(f"Ошибка: {error}")
             return False
 
-    def stub(self, args):
-        command, *values = args
-        if len(values) > 1:
-            raise ValueError(f"{command}: нужен не более одного пути")
-        print(f"{command}: {values}")
+    def ls(self, args):
+        flags, paths = parse_options(args, "a")
+        path = self.vfs.resolve(single_path(paths, self.cwd), self.cwd)
+        for name in self.vfs.list_names(path, "a" in flags):
+            print(name)
+
+    def cd(self, args):
+        path = self.vfs.resolve(single_path(args, "/"), self.cwd)
+        if path not in self.vfs.dirs:
+            raise NotADirectoryError(f"не каталог: {path}")
+        self.cwd = path
+
+    def pwd(self, args):
+        no_args(args, "pwd")
+        print(self.cwd)
+
+    def date(self, args):
+        no_args(args, "date")
+        print(datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z"))
+
+    def uptime(self, args):
+        no_args(args, "uptime")
+        seconds = int(time.monotonic() - self.started)
+        print(f"up {timedelta(seconds=seconds)}")
 
     def exit(self, args):
-        if args:
-            raise ValueError("exit: аргументы не нужны")
+        no_args(args, "exit")
         self.running = False
 
     def conf_dump(self, args):
-        if args:
-            raise ValueError("conf-dump: аргументы не нужны")
+        no_args(args, "conf-dump")
         for key, value in self.config.items():
             print(f"{key}={value}")
 

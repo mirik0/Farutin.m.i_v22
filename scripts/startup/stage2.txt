@@ -1,6 +1,4 @@
 conf-dump
 ls
-ls "my folder"
 cd
-cd 'my folder'
 exit

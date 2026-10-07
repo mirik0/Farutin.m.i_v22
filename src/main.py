@@ -1,6 +1,5 @@
 
 import argparse
-from pathlib import Path
 
 from .shell import Shell
 from .vfs import VFS
@@ -20,7 +19,7 @@ def main():
     config = {"vfs": args.vfs, "script": args.script}
     try:
         vfs = VFS(args.vfs)
-        shell = Shell(vfs.name, config)
+        shell = Shell(vfs, config)
         shell.conf_dump([])
         vfs.show_motd()
         if args.script and not shell.run_script(args.script):

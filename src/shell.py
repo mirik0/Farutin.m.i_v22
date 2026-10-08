@@ -21,6 +21,7 @@ class Shell:
             "date": self.date,
             "uptime": self.uptime,
             "pwd": self.pwd,
+            "rm": self.rm,
             "exit": self.exit,
             "conf-dump": self.conf_dump,
         }
@@ -50,8 +51,7 @@ class Shell:
 
     def cd(self, args):
         path = self.vfs.resolve(single_path(args, "/"), self.cwd)
-        if path not in self.vfs.dirs:
-            raise NotADirectoryError(f"не каталог: {path}")
+        self.vfs.require_directory(path)
         self.cwd = path
 
     def pwd(self, args):
@@ -66,6 +66,20 @@ class Shell:
         no_args(args, "uptime")
         seconds = int(time.monotonic() - self.started)
         print(f"up {timedelta(seconds=seconds)}")
+
+    def rm(self, args):
+        flags, paths = parse_options(args, "rRf")
+        if not paths and "f" not in flags:
+            raise ValueError("rm: укажите хотя бы один путь")
+        recursive = "r" in flags or "R" in flags
+        for value in paths:
+            try:
+                path = self.vfs.resolve(value, self.cwd)
+            except FileNotFoundError:
+                if "f" in flags:
+                    continue
+                raise
+            self.vfs.remove(path, recursive, self.cwd)
 
     def exit(self, args):
         no_args(args, "exit")

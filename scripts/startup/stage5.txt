@@ -1,0 +1,12 @@
+ls
+rm readme.txt binary.bin
+ls
+rm -f missing.txt
+rm -f
+rm -r /docs
+ls
+rm -R /empty
+rm -rf "/my folder"
+rm -- .hidden
+ls -a
+exit

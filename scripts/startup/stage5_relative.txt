@@ -1,0 +1,7 @@
+cd docs
+rm note.txt
+ls
+cd /
+rm -r docs
+ls
+exit

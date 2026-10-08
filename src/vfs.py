@@ -44,8 +44,7 @@ class VFS:
             raise ValueError("путь не может быть пустым")
         current = "/" if path.startswith("/") else cwd
         for part in path.split("/"):
-            if current not in self.dirs:
-                raise NotADirectoryError(f"не каталог: {current}")
+            self.require_directory(current)
             if part in ("", "."):
                 continue
             if part == "..":
@@ -54,9 +53,13 @@ class VFS:
                 current = posixpath.join(current, part)
                 if current not in self.dirs and current not in self.files:
                     raise FileNotFoundError(f"путь не найден: {current}")
-        if path.endswith("/") and current not in self.dirs:
-            raise NotADirectoryError(f"не каталог: {current}")
+        if path.endswith("/"):
+            self.require_directory(current)
         return current
+
+    def require_directory(self, path):
+        if path not in self.dirs:
+            raise NotADirectoryError(f"не каталог: {path}")
 
     def list_names(self, path, show_all=False):
         if path in self.files:
@@ -71,3 +74,24 @@ class VFS:
             if show_all or not name.startswith("."):
                 names.append(name)
         return sorted(names)
+
+    def remove(self, path, recursive, cwd):
+        if path in self.files:
+            del self.files[path]
+            return
+        if not recursive:
+            raise IsADirectoryError(f"это каталог, нужен -r: {path}")
+        if path == "/":
+            raise ValueError("rm: нельзя удалять корень VFS")
+        if cwd == path or cwd.startswith(path + "/"):
+            raise ValueError("rm: нельзя удалять текущий каталог или родителя")
+        self.remove_tree(path)
+
+    def remove_tree(self, path):
+        prefix = path + "/"
+        for name in list(self.files):
+            if name.startswith(prefix):
+                del self.files[name]
+        for name in list(self.dirs):
+            if name == path or name.startswith(prefix):
+                self.dirs.remove(name)
